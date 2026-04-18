@@ -170,6 +170,10 @@ class ItemsMenu
                 case "View Details":
                     PrintItemDetails(item);
                     break;
+                case "Delete Item":
+                    Boolean deleted = DeleteItem(item);
+                    if(deleted) return;
+                    break;
                 case "Assign / Change Location":
                     UpdateItemLocation(item);
                     break;
@@ -211,6 +215,15 @@ class ItemsMenu
         AnsiConsole.MarkupLine($"[bold]Loan Status: [/] [red]{nyi}[/]");
         AnsiConsole.WriteLine("\nAny key to return");
         Console.ReadKey(true);
+    }
+
+    Boolean DeleteItem(Item item)
+    {
+        if(AnsiConsole.Confirm($"Are you sure you want to delete {item.Name}")) 
+        {
+            return itemManager.DeleteItem(item.Id);
+        }
+        return false;
     }
 
 }
