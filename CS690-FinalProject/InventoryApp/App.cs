@@ -11,6 +11,7 @@ class App
 
     const String nyi = "Not yet implemented";
     private ItemManager itemManager = new ItemManager();
+    private LocationsManager locationsManager = new LocationsManager();
 
     public void Run()
     {
@@ -35,7 +36,11 @@ class App
                 case "Items":
                     var itemsMenu = new ItemsMenu(itemManager);
                     itemsMenu.Show();
-                    break;           
+                    break;
+                case "Locations":
+                    var locationsMenu = new LocationsMenu(locationsManager);
+                    locationsMenu.Show();     
+                    break;      
                 default:
                     AnsiConsole.WriteLine(nyi);
                     break;

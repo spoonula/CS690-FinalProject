@@ -4,12 +4,12 @@ using System.Linq;
 
 namespace InventoryApp.Services
 {
-    public class LocationManager
+    public class LocationsManager
     {
         private JsonStore<Location> store;
         private List<Location> locations;
 
-        public LocationManager()
+        public LocationsManager()
         {
             store = new JsonStore<Location>("Data/locations.json");
             locations = store.Load();
@@ -25,7 +25,7 @@ namespace InventoryApp.Services
             return locations.FirstOrDefault(location => location.Id == id);
         }
 
-        public Location CreateLocation(string name, string description, decimal estimatedValue)
+        public Location CreateLocation(string name)
         {
             Location location = new Location();
             location.Id = Guid.NewGuid();
