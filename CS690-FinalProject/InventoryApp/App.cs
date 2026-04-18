@@ -1,11 +1,11 @@
 namespace InventoryApp;
 
-using System;
+using Spectre.Console;
 
 class App
 {
     public void Run()
     {
-        Console.WriteLine("Hello, World!");
+        AnsiConsole.MarkupLine("[bold]Hello, World![/]");
     }
 }
