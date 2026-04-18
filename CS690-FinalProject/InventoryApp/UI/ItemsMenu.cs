@@ -66,7 +66,11 @@ class ItemsMenu
         {
             AnsiConsole.WriteLine(nyi);
         }
-        itemManager.CreateItem(name, description, value);
+        Item? item = itemManager.CreateItem(name, description, value);
+        if (item != null)
+        {
+            ItemActionMenu(item);
+        }
     }                
 
     void SelectItemMenu()
@@ -123,7 +127,7 @@ class ItemsMenu
             AnsiConsole.Clear();
             var selection = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
-                    .Title("=== Select Item ===")
+                    .Title($"=== {item.Name} ===")
                     .AddChoices("View Details", "Update Item", "Delete Item", "Assign / Change Location", 
                     "Mark as Loaned", "Mark as Returned", "Back")
             );
