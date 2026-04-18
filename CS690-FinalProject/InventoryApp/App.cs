@@ -1,14 +1,17 @@
 namespace InventoryApp;
 
 using Spectre.Console;
+using InventoryApp.Services;
 
 class App
 {
 
     const String nyi = "Not yet implemented";
+    private ItemManager? itemManager;
 
     public void Run()
     {
+        itemManager = new ItemManager();
         MainMenu();
     }
 
@@ -74,12 +77,12 @@ class App
         String name = PromptNotEmpty("Enter item name:");
         String description = PromptNotEmpty("Enter item description:");
         decimal value = PromptDecimal("Enter estimated value:", false);
-        AnsiConsole.WriteLine(nyi);
         AnsiConsole.WriteLine("");
         if (AnsiConsole.Confirm("Assign Location?"))
         {
             AnsiConsole.WriteLine(nyi);
         }
+        itemManager.CreateItem(name, description, value);
     }
 
     // validation helpers
