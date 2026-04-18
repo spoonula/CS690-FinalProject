@@ -39,7 +39,7 @@ namespace InventoryApp.Services
             return item;
         }
 
-        public bool UpdateItem(Guid id, string name, string description, decimal estimatedValue)
+        public bool UpdateItem(Guid id, string name, string description, decimal estimatedValue, Guid? locationId)
         {
             Item? item = GetItemById(id);
 
@@ -51,6 +51,7 @@ namespace InventoryApp.Services
             item.Name = name;
             item.Description = description;
             item.EstimatedValue = estimatedValue;
+            item.LocationId = locationId;
 
             Save();
             return true;

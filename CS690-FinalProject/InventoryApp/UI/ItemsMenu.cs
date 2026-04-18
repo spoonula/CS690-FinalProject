@@ -66,7 +66,7 @@ class ItemsMenu
         AnsiConsole.WriteLine("");
         if (AnsiConsole.Confirm("Assign Location?"))
         {
-            l = LocationSelectMenu();
+            l = LocationSelectMenu(l);
         }
         Item? item = itemManager.CreateItem(name, description, value, l?.Id);
         if (item != null)
@@ -75,12 +75,16 @@ class ItemsMenu
         }
     }      
 
-    Location? LocationSelectMenu()
+    Location? LocationSelectMenu(Location? currentLocation)
     {
-        Location? l = null;
+        Location? l = currentLocation;
         var locations = locationsManager.GetAllLocations();
         var options = locations.Select(loc => loc.Name).ToList();
         options.Add("Create New Location");
+        if (l != null)
+        {
+            options.Add("Remove Location");
+        }
         options.Add("Back");
         var selection = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
@@ -95,6 +99,9 @@ class ItemsMenu
                     l = locationsMenu.CreateLocationMenu();
                 break;
             case "Back":
+                break;
+            case "Remove Location":
+                l = null;
                 break;
             default:
                 int index = options.IndexOf(selection);
@@ -163,6 +170,9 @@ class ItemsMenu
                 case "View Details":
                     PrintItemDetails(item);
                     break;
+                case "Assign / Change Location":
+                    UpdateItemLocation(item);
+                    break;
                 default:
                     AnsiConsole.WriteLine(nyi);
                     break;
@@ -170,25 +180,28 @@ class ItemsMenu
         }
     }
 
+    void UpdateItemLocation(Item item)
+    {
+        Location? l = null;
+        if (item.LocationId is Guid LocationId)
+        {
+            l = locationsManager.GetLocationById(LocationId);
+        }
+        l = LocationSelectMenu(l);
+        itemManager.UpdateItem(item.Id, item.Name, item.Description, item.EstimatedValue, l?.Id);
+    }
+
     void PrintItemDetails(Item item)
     {
         string locationText;
-        if (item.LocationId == null)
+        if (item.LocationId is Guid locationId)
         {
-            locationText = "Unassigned";
+            var location = locationsManager.GetLocationById(locationId);
+            locationText = location != null ? location.Name : "Unknown location";
         }
         else
         {
-            var location = locationsManager.GetLocationById(item.LocationId.Value);
-            if (location != null)
-            {
-                locationText = location.Name;
-            }
-            else
-            {
-                locationText = "Unknown location";
-            }
-
+            locationText = "Unassigned";
         }
 
         AnsiConsole.MarkupLine($"[bold]Name: {item.Name}[/]");
