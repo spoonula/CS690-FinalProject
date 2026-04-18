@@ -9,22 +9,24 @@ class LocationsMenu
 {
 
     const String nyi = "Not yet implemented";
-    private LocationsManager locationManager;
+    private LocationsManager locationsManager;
 
-    public LocationsMenu(LocationsManager locationManager) 
+    public LocationsMenu(LocationsManager locationsManager) 
     {
-        this.locationManager = locationManager;
+        this.locationsManager = locationsManager;
     }
 
     public void Show()
     {
         while (true)
         {
+            Location l;
             var options = new List<string>();
             options.Add("Create Location");
-            if (locationManager.GetAllLocations().Count > 0)
+            if (locationsManager.GetAllLocations().Count > 0)
             {
-                options.Add("Select Location");
+                options.Add("Update Location");
+                options.Add("Delete Location");
             }
             options.Add("Back");
             AnsiConsole.Clear();
@@ -41,9 +43,12 @@ class LocationsMenu
                 case "Create Location":
                     CreateLocationMenu();
                     break;
-                // case "Select Item":
-                //     SelectItemMenu();
-                //     break;
+                case "Update Location":
+                    l = SelectLocationByListMenu();
+                    break;
+                case "Delete Location":
+                    l = SelectLocationByListMenu();
+                    break;
                 default:
                     AnsiConsole.WriteLine(nyi);
                     break;
@@ -51,7 +56,7 @@ class LocationsMenu
         }
     }
 
-    void CreateLocationMenu()
+    public Location CreateLocationMenu()
     {
 
         AnsiConsole.Clear();
@@ -60,7 +65,8 @@ class LocationsMenu
         // Get Item inputs
         String name = PromptNotEmpty("Enter location name:");
 
-        locationManager.CreateLocation(name);
+        return locationsManager.CreateLocation(name);
+
     }                
 
     // void SelectItemMenu()
@@ -91,24 +97,17 @@ class LocationsMenu
     //     }
     // }
 
-    // void SelectItemByListMenu()
-    // {
-    //     if (locationManager.GetAllItems().Count == 0)
-    //     {
-    //         AnsiConsole.MarkupLine("[red]No items available[/]");
-    //         AnsiConsole.WriteLine("Any key to continue");
-    //         Console.ReadKey(true);
-    //         return;
-    //     }
-    //     Item selectedItem = AnsiConsole.Prompt(
-    //         new SelectionPrompt<Item>()
-    //             .Title("=== Select an Item ===")
-    //             .PageSize(10)
-    //             .UseConverter(item => item.Name)
-    //             .AddChoices(locationManager.GetAllItems())
-    //     );
-    //     ItemActionMenu(selectedItem);
-    // }
+    Location SelectLocationByListMenu()
+    {
+        Location selectedLocation = AnsiConsole.Prompt(
+            new SelectionPrompt<Location>()
+                .Title("=== Select an Location ===")
+                .PageSize(10)
+                .UseConverter(location => location.Name)
+                .AddChoices(locationsManager.GetAllLocations())
+        );
+        return selectedLocation;
+    }
 
     // void ItemActionMenu(Item item)
     // {

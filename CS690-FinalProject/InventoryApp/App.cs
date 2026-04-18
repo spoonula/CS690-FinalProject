@@ -34,7 +34,7 @@ class App
                 case "Exit":
                     return;
                 case "Items":
-                    var itemsMenu = new ItemsMenu(itemManager);
+                    var itemsMenu = new ItemsMenu(itemManager, locationsManager);
                     itemsMenu.Show();
                     break;
                 case "Locations":

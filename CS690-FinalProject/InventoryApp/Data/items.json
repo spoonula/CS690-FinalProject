@@ -3,12 +3,21 @@
     "Id": "a7c52bf3-b510-408c-a93c-e3fdd0a21fd7",
     "Name": "z",
     "Description": "z",
-    "EstimatedValue": 1
+    "EstimatedValue": 1,
+    "LocationId": null
   },
   {
     "Id": "53678169-e005-442f-a289-89a3fde34d83",
     "Name": "x2",
     "Description": "x4",
-    "EstimatedValue": 5
+    "EstimatedValue": 5,
+    "LocationId": null
+  },
+  {
+    "Id": "75fcf36a-c04e-4f57-bcef-26faa6607349",
+    "Name": "l",
+    "Description": "l",
+    "EstimatedValue": 4,
+    "LocationId": "bfb0a554-039c-4bef-b1f3-1faa2352bcc2"
   }
 ]

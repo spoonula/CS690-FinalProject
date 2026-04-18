@@ -25,14 +25,14 @@ namespace InventoryApp.Services
             return items.FirstOrDefault(item => item.Id == id);
         }
 
-        public Item CreateItem(string name, string description, decimal estimatedValue)
+        public Item CreateItem(string name, string description, decimal estimatedValue, Guid? locationId)
         {
             Item item = new Item();
             item.Id = Guid.NewGuid();
             item.Name = name;
             item.Description = description;
             item.EstimatedValue = estimatedValue;
-
+            item.LocationId = locationId;
             items.Add(item);
             Save();
 

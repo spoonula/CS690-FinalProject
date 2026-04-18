@@ -6,9 +6,9 @@ namespace InventoryApp.Models
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public decimal EstimatedValue { get; set; }
-
+        public Guid? LocationId { get; set; }
         // TODO: Implement
-        // public int? LocationId { get; set; }
+        
         // public bool IsLoaned { get; set; }
         // public int? BorrowerId { get; set; }
     }

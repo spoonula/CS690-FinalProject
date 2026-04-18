@@ -10,10 +10,12 @@ class ItemsMenu
 
     const String nyi = "Not yet implemented";
     private ItemManager itemManager;
+    private LocationsManager locationsManager;
 
-    public ItemsMenu(ItemManager itemManager) 
+    public ItemsMenu(ItemManager itemManager, LocationsManager locationsManager) 
     {
         this.itemManager = itemManager;
+        this.locationsManager = locationsManager;
     }
 
     public void Show()
@@ -56,7 +58,7 @@ class ItemsMenu
 
         AnsiConsole.Clear();
         AnsiConsole.WriteLine("=== Create Item ===\n");
-        
+        Location? l = null;
         // Get Item inputs
         String name = PromptNotEmpty("Enter item name:");
         String description = PromptNotEmpty("Enter item description:");
@@ -64,14 +66,43 @@ class ItemsMenu
         AnsiConsole.WriteLine("");
         if (AnsiConsole.Confirm("Assign Location?"))
         {
-            AnsiConsole.WriteLine(nyi);
+            l = LocationSelectMenu();
         }
-        Item? item = itemManager.CreateItem(name, description, value);
+        Item? item = itemManager.CreateItem(name, description, value, l?.Id);
         if (item != null)
         {
             ItemActionMenu(item);
         }
-    }                
+    }      
+
+    Location? LocationSelectMenu()
+    {
+        Location? l = null;
+        var locations = locationsManager.GetAllLocations();
+        var options = locations.Select(loc => loc.Name).ToList();
+        options.Add("Create New Location");
+        options.Add("Back");
+        var selection = AnsiConsole.Prompt(
+            new SelectionPrompt<string>()
+            .Title("=== Select a location === ")
+            .AddChoices(options)
+        );
+
+        switch (selection)
+        {
+            case "Create New Location":
+                    LocationsMenu locationsMenu = new LocationsMenu(locationsManager);
+                    l = locationsMenu.CreateLocationMenu();
+                break;
+            case "Back":
+                break;
+            default:
+                int index = options.IndexOf(selection);
+                l = locations[index];
+                break;
+        }
+        return l;
+    }          
 
     void SelectItemMenu()
     {
@@ -103,13 +134,6 @@ class ItemsMenu
 
     void SelectItemByListMenu()
     {
-        if (itemManager.GetAllItems().Count == 0)
-        {
-            AnsiConsole.MarkupLine("[red]No items available[/]");
-            AnsiConsole.WriteLine("Any key to continue");
-            Console.ReadKey(true);
-            return;
-        }
         Item selectedItem = AnsiConsole.Prompt(
             new SelectionPrompt<Item>()
                 .Title("=== Select an Item ===")
@@ -148,9 +172,28 @@ class ItemsMenu
 
     void PrintItemDetails(Item item)
     {
+        string locationText;
+        if (item.LocationId == null)
+        {
+            locationText = "Unassigned";
+        }
+        else
+        {
+            var location = locationsManager.GetLocationById(item.LocationId.Value);
+            if (location != null)
+            {
+                locationText = location.Name;
+            }
+            else
+            {
+                locationText = "Unknown location";
+            }
+
+        }
+
         AnsiConsole.MarkupLine($"[bold]Name: {item.Name}[/]");
         AnsiConsole.MarkupLine($"[bold]Description: [/] {item.Description}");
-        AnsiConsole.MarkupLine($"[bold]Location: [/] {nyi}");
+        AnsiConsole.MarkupLine($"[bold]Location: [/] {locationText}");
         AnsiConsole.MarkupLine($"[bold]Value: [/] ${item.EstimatedValue:C}");
         AnsiConsole.MarkupLine($"[bold]Loan Status: [/] [red]{nyi}[/]");
         AnsiConsole.WriteLine("\nAny key to return");
