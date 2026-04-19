@@ -5,6 +5,8 @@ using InventoryApp.Services;
 using InventoryApp.Models;
 using static InventoryApp.UI.PromptHelpers;
 using InventoryApp.UI;
+using CsvHelper;
+using System.Globalization;
 
 class App
 {
