@@ -34,6 +34,7 @@ namespace InventoryApp.Services
             item.EstimatedValue = estimatedValue;
             item.LocationId = locationId;
             items.Add(item);
+            items.Sort((x, y) => x.Name.CompareTo(y.Name));
             Save();
 
             return item;
@@ -52,7 +53,7 @@ namespace InventoryApp.Services
             item.Description = description;
             item.EstimatedValue = estimatedValue;
             item.LocationId = locationId;
-
+            items.Sort((x, y) => x.Name.CompareTo(y.Name));
             Save();
             return true;
         }

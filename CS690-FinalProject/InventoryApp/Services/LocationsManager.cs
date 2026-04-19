@@ -32,6 +32,7 @@ namespace InventoryApp.Services
             location.Name = name;
 
             locations.Add(location);
+            locations.Sort((x, y) => x.Name.CompareTo(y.Name));
             Save();
 
             return location;
@@ -47,7 +48,7 @@ namespace InventoryApp.Services
             }
 
             location.Name = name;
-
+            locations.Sort((x, y) => x.Name.CompareTo(y.Name));
             Save();
             return true;
         }
