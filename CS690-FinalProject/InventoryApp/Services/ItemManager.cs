@@ -25,6 +25,13 @@ namespace InventoryApp.Services
             return items.FirstOrDefault(item => item.Id == id);
         }
 
+        public List<Item> GetItemsByLocationId(Guid locationId)
+        {
+            return items
+                .Where(item => item.LocationId == locationId)
+                .ToList();
+        }
+
         public Item CreateItem(string name, string description, decimal estimatedValue, Guid? locationId)
         {
             Item item = new Item();
@@ -71,6 +78,12 @@ namespace InventoryApp.Services
             Save();
 
             return true;
+        }
+
+        public bool LocationHasItems(Guid locationId)
+        {
+            // search items and confirm that the location id exists at least once
+            return items.Any(item => item.LocationId == locationId);
         }
 
         private void Save()

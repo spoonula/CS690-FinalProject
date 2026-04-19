@@ -26,7 +26,7 @@ class ItemsMenu
             options.Add("Create Item");
             if (itemManager.GetAllItems().Count > 0)
             {
-                options.Add("Select Item");
+                options.Add("Search/Browse Items");
             }
             options.Add("Back");
             AnsiConsole.Clear();
@@ -43,8 +43,8 @@ class ItemsMenu
                 case "Create Item":
                     CreateItemMenu();
                     break;
-                case "Select Item":
-                    SelectItemMenu();
+                case "Search/Browse Items":
+                    SelectItemByListMenu();
                     break;
                 default:
                     AnsiConsole.WriteLine(nyi);
@@ -66,7 +66,7 @@ class ItemsMenu
         AnsiConsole.WriteLine("");
         if (AnsiConsole.Confirm("Assign Location?"))
         {
-            l = LocationSelectMenu(l);
+            l = LocationSelectMenu(l, true, false);
         }
         Item? item = itemManager.CreateItem(name, description, value, l?.Id);
         if (item != null)
@@ -75,12 +75,21 @@ class ItemsMenu
         }
     }      
 
-    Location? LocationSelectMenu(Location? currentLocation)
+    Location? LocationSelectMenu(Location? currentLocation, Boolean allowCreate, Boolean mustHaveItems)
     {
         Location? l = currentLocation;
         var locations = locationsManager.GetAllLocations();
+        if (mustHaveItems)
+        {
+            locations = locations
+                .Where(l => itemManager.LocationHasItems(l.Id))
+                .ToList();
+        }
         var options = locations.Select(loc => loc.Name).ToList();
-        options.Add("Create New Location");
+        if (allowCreate)
+        {
+            options.Add("Create New Location");
+        }
         if (l != null)
         {
             options.Add("Remove Location");
@@ -111,43 +120,26 @@ class ItemsMenu
         return l;
     }          
 
-    void SelectItemMenu()
-    {
-        while (true)
-        {
-            AnsiConsole.Clear();
-            var selection = AnsiConsole.Prompt(
-                new SelectionPrompt<string>()
-                    .Title("=== Select Item ===")
-                    .AddChoices("Search by name", "Browse all items", "Back")
-            );
-
-            switch (selection)
-            {
-                case "Back":
-                    return;
-                case "Search by name":
-                    AnsiConsole.WriteLine(nyi);
-                    break;
-                case "Browse all items":
-                    SelectItemByListMenu();
-                    break;
-                default:
-                    AnsiConsole.WriteLine(nyi);
-                    break;
-            }
-        }
-    }
-
     void SelectItemByListMenu()
     {
+        Location? l = null;
+        List<Item> itemOptions = itemManager.GetAllItems();
+        if (AnsiConsole.Confirm("Filter by location?"))
+        {
+            l = LocationSelectMenu(l, false, true);
+            if (l != null)
+            {
+                itemOptions = itemManager.GetItemsByLocationId(l.Id);
+            }
+        }
         Item selectedItem = AnsiConsole.Prompt(
             new SelectionPrompt<Item>()
                 .Title("=== Select an Item ===")
                 .PageSize(10)
+                .AddChoices(itemOptions)
                 .UseConverter(item => item.Name)
-                .AddChoices(itemManager.GetAllItems())
-        );
+                .EnableSearch()
+            );
         ItemActionMenu(selectedItem);
     }
 
@@ -191,7 +183,7 @@ class ItemsMenu
         {
             l = locationsManager.GetLocationById(LocationId);
         }
-        l = LocationSelectMenu(l);
+        l = LocationSelectMenu(l, true, false);
         itemManager.UpdateItem(item.Id, item.Name, item.Description, item.EstimatedValue, l?.Id);
     }
 
