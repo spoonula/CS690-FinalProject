@@ -28,7 +28,7 @@ class App
             var selection = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title("=== Main Menu ===")
-                    .AddChoices("Items", "Locations", "Borrowers", "Reports", "Exit")
+                    .AddChoices("Items", "Locations", /*"Borrowers", */"Reports", "Exit")
             );
 
             switch (selection)

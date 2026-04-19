@@ -97,7 +97,7 @@ class ItemsMenu
         }
         if (l != null)
         {
-            options.Add("Remove Location");
+            options.Add("Remove Location From Item");
         }
         options.Add("Back");
         var selection = AnsiConsole.Prompt(
@@ -114,7 +114,7 @@ class ItemsMenu
                 break;
             case "Back":
                 break;
-            case "Remove Location":
+            case "Remove Location From Item":
                 l = null;
                 break;
             default:
@@ -129,7 +129,7 @@ class ItemsMenu
     {
         Location? l = null;
         List<Item> itemOptions = itemManager.GetAllItems();
-        if (AnsiConsole.Confirm("Filter by location?"))
+        if (AnsiConsole.Confirm("Filter by location?", defaultValue: false))
         {
             l = LocationSelectMenu(l, false, true);
             if (l != null)
@@ -156,8 +156,8 @@ class ItemsMenu
             var selection = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title($"=== {item.Name} ===")
-                    .AddChoices("View Details", "Update Item", "Delete Item", "Assign / Change Location", 
-                    "Mark as Loaned", "Mark as Returned", "Back")
+                    .AddChoices("View Details", /*"Update Item", */"Delete Item", "Assign / Change Location", 
+                    /*"Mark as Loaned", "Mark as Returned", */"Back")
             );
 
             switch (selection)
@@ -216,7 +216,7 @@ class ItemsMenu
 
     Boolean DeleteItem(Item item)
     {
-        if(AnsiConsole.Confirm($"Are you sure you want to delete {item.Name}")) 
+        if(AnsiConsole.Confirm($"Are you sure you want to delete {item.Name}", defaultValue:false)) 
         {
             return itemManager.DeleteItem(item.Id);
         }

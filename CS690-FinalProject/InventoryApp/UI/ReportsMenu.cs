@@ -25,7 +25,7 @@ class ReportsMenu
             var selection = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title("=== Items ===")
-                    .AddChoices("Inventory Report", "Loan Report", "Back")
+                    .AddChoices("Inventory Report",/* "Loan Report", */"Back")
             );
 
             switch (selection)
@@ -71,7 +71,7 @@ class ReportsMenu
             {
                 ItemName = item.Name,
                 Location = locationName,
-                EstimatedValue = item.EstimatedValue
+                EstimatedValue = item.EstimatedValue.ToString("F2")
             };
         });
 

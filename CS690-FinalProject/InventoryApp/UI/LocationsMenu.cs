@@ -25,8 +25,8 @@ class LocationsMenu
             options.Add("Create Location");
             if (locationsManager.GetAllLocations().Count > 0)
             {
-                options.Add("Update Location");
-                options.Add("Delete Location");
+                //options.Add("Update Location");
+                //options.Add("Delete Location");
             }
             options.Add("Back");
             AnsiConsole.Clear();
@@ -69,33 +69,6 @@ class LocationsMenu
 
     }                
 
-    // void SelectItemMenu()
-    // {
-    //     while (true)
-    //     {
-    //         AnsiConsole.Clear();
-    //         var selection = AnsiConsole.Prompt(
-    //             new SelectionPrompt<string>()
-    //                 .Title("=== Select Item ===")
-    //                 .AddChoices("Search by name", "Browse all items", "Back")
-    //         );
-
-    //         switch (selection)
-    //         {
-    //             case "Back":
-    //                 return;
-    //             case "Search by name":
-    //                 AnsiConsole.WriteLine(nyi);
-    //                 break;
-    //             case "Browse all items":
-    //                 SelectItemByListMenu();
-    //                 break;
-    //             default:
-    //                 AnsiConsole.WriteLine(nyi);
-    //                 break;
-    //         }
-    //     }
-    // }
 
     Location SelectLocationByListMenu()
     {
@@ -108,42 +81,5 @@ class LocationsMenu
         );
         return selectedLocation;
     }
-
-    // void ItemActionMenu(Item item)
-    // {
-    //     while (true)
-    //     {
-    //         AnsiConsole.Clear();
-    //         var selection = AnsiConsole.Prompt(
-    //             new SelectionPrompt<string>()
-    //                 .Title($"=== {item.Name} ===")
-    //                 .AddChoices("View Details", "Update Item", "Delete Item", "Assign / Change Location", 
-    //                 "Mark as Loaned", "Mark as Returned", "Back")
-    //         );
-
-    //         switch (selection)
-    //         {
-    //             case "Back":
-    //                 return;
-    //             case "View Details":
-    //                 PrintItemDetails(item);
-    //                 break;
-    //             default:
-    //                 AnsiConsole.WriteLine(nyi);
-    //                 break;
-    //         }
-    //     }
-    // }
-
-    // void PrintItemDetails(Item item)
-    // {
-    //     AnsiConsole.MarkupLine($"[bold]Name: {item.Name}[/]");
-    //     AnsiConsole.MarkupLine($"[bold]Description: [/] {item.Description}");
-    //     AnsiConsole.MarkupLine($"[bold]Location: [/] {nyi}");
-    //     AnsiConsole.MarkupLine($"[bold]Value: [/] ${item.EstimatedValue:C}");
-    //     AnsiConsole.MarkupLine($"[bold]Loan Status: [/] [red]{nyi}[/]");
-    //     AnsiConsole.WriteLine("\nAny key to return");
-    //     Console.ReadKey(true);
-    // }
 
 }
