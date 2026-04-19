@@ -40,7 +40,11 @@ class App
                 case "Locations":
                     var locationsMenu = new LocationsMenu(locationsManager);
                     locationsMenu.Show();     
-                    break;      
+                    break;   
+                case "Reports":
+                    var reportsMenu = new ReportsMenu(itemManager, locationsManager);
+                    reportsMenu.Show();
+                    break;   
                 default:
                     AnsiConsole.WriteLine(nyi);
                     break;
