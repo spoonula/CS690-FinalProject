@@ -11,7 +11,7 @@
     "Name": "Triangle",
     "Description": "A silver triangle",
     "EstimatedValue": 14,
-    "LocationId": "aaa8fb8f-b728-49d0-bc36-929baf9bce16"
+    "LocationId": "e8f4fed1-67be-486b-b68f-dec5c34b9608"
   },
   {
     "Id": "1d3de608-da1c-4610-b275-70f5c9da33af",
@@ -19,6 +19,13 @@
     "Description": "It\u0027s a wrench, yo!",
     "EstimatedValue": 12,
     "LocationId": "e8f4fed1-67be-486b-b68f-dec5c34b9608"
+  },
+  {
+    "Id": "6dc01043-72fd-45e9-95c6-98a4d8a7ba2d",
+    "Name": "x",
+    "Description": "x4",
+    "EstimatedValue": 4,
+    "LocationId": "95e034b2-0f70-46f3-976e-538dadc400da"
   },
   {
     "Id": "c3dd768a-f372-4917-9726-1350513fb67a",

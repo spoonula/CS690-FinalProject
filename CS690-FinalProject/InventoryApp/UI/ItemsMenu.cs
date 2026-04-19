@@ -4,6 +4,7 @@ using Spectre.Console;
 using InventoryApp.Services;
 using InventoryApp.Models;
 using static InventoryApp.UI.PromptHelpers;
+using System.Globalization;
 
 class ItemsMenu
 {
@@ -60,7 +61,7 @@ class ItemsMenu
         AnsiConsole.WriteLine("=== Create Item ===\n");
         Location? l = null;
         // Get Item inputs
-        String name = PromptNotEmpty("Enter item name:");
+        String name = ItemNamePrompt();
         String description = PromptNotEmpty("Enter item description:");
         decimal value = PromptDecimal("Enter estimated value:", false);
         AnsiConsole.WriteLine("");
@@ -72,6 +73,10 @@ class ItemsMenu
         if (item != null)
         {
             ItemActionMenu(item);
+        }
+        else
+        {
+            AnsiConsole.MarkupLine("[red]Item could not create[/]");
         }
     }      
 
@@ -203,7 +208,7 @@ class ItemsMenu
         AnsiConsole.MarkupLine($"[bold]Name: {item.Name}[/]");
         AnsiConsole.MarkupLine($"[bold]Description: [/] {item.Description}");
         AnsiConsole.MarkupLine($"[bold]Location: [/] {locationText}");
-        AnsiConsole.MarkupLine($"[bold]Value: [/] ${item.EstimatedValue:C}");
+        AnsiConsole.MarkupLine($"[bold]Value: [/] {item.EstimatedValue.ToString("C", CultureInfo.GetCultureInfo("en-US"))}");
         AnsiConsole.MarkupLine($"[bold]Loan Status: [/] [red]{nyi}[/]");
         AnsiConsole.WriteLine("\nAny key to return");
         Console.ReadKey(true);
@@ -216,6 +221,22 @@ class ItemsMenu
             return itemManager.DeleteItem(item.Id);
         }
         return false;
+    }
+
+    // helpers
+    private string ItemNamePrompt()
+    {
+        string name;
+        while(true)
+        {
+            name = PromptNotEmpty("Enter item name:");
+            if (itemManager.ItemNameExists(name))
+            {
+                AnsiConsole.MarkupLine($"[red]{name} is already an item[/]");
+                continue;
+            }
+            return name;
+        }
     }
 
 }

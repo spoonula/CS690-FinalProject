@@ -32,8 +32,14 @@ namespace InventoryApp.Services
                 .ToList();
         }
 
-        public Item CreateItem(string name, string description, decimal estimatedValue, Guid? locationId)
+        public Item? CreateItem(string name, string description, decimal estimatedValue, Guid? locationId)
         {
+            if (ItemNameExists(name))
+            {
+                // no dups!
+                return null;
+            }
+            
             Item item = new Item();
             item.Id = Guid.NewGuid();
             item.Name = name;
@@ -84,6 +90,11 @@ namespace InventoryApp.Services
         {
             // search items and confirm that the location id exists at least once
             return items.Any(item => item.LocationId == locationId);
+        }
+
+        public bool ItemNameExists(string name)
+        {
+            return items.Any(item => item.Name == name);
         }
 
         private void Save()
