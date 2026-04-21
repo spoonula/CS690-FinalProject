@@ -156,7 +156,7 @@ class ItemsMenu
             var selection = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title($"=== {item.Name} ===")
-                    .AddChoices("View Details", /*"Update Item", */"Delete Item", "Assign / Change Location", 
+                    .AddChoices("View Details", "Update Item", "Delete Item", "Assign / Change Location", 
                     /*"Mark as Loaned", "Mark as Returned", */"Back")
             );
 
@@ -166,6 +166,9 @@ class ItemsMenu
                     return;
                 case "View Details":
                     PrintItemDetails(item);
+                    break;
+                case "Update Item":
+                    UpdateItemMenu(item);
                     break;
                 case "Delete Item":
                     Boolean deleted = DeleteItem(item);
@@ -178,6 +181,24 @@ class ItemsMenu
                     AnsiConsole.WriteLine(nyi);
                     break;
             }
+        }
+    }
+
+    void UpdateItemMenu(Item item)
+    {
+
+        AnsiConsole.Clear();
+        AnsiConsole.WriteLine("=== Update Item ===\n");
+        // Get Item inputs
+        String name = ItemNamePrompt(item.Name);
+        String description = PromptNotEmpty("Enter item description:", item.Description);
+        decimal value = PromptDecimal("Enter estimated value:", false, item.EstimatedValue.ToString());
+        AnsiConsole.WriteLine("");
+        bool success = itemManager.UpdateItem(item.Id, name, description, value, item.LocationId);
+        if (!success)
+        {
+            AnsiConsole.MarkupLine("[red]Item could not update[/]");
+            System.Console.ReadKey(true);
         }
     }
 
@@ -224,12 +245,14 @@ class ItemsMenu
     }
 
     // helpers
-    private string ItemNamePrompt()
+    private string ItemNamePrompt(String? defaultValue = null)
     {
         string name;
         while(true)
         {
-            name = PromptNotEmpty("Enter item name:");
+            name = defaultValue is not null
+            ? PromptNotEmpty("Enter item name:", defaultValue)
+            : PromptNotEmpty("Enter item name:");
             if (itemManager.ItemNameExists(name))
             {
                 AnsiConsole.MarkupLine($"[red]{name} is already an item[/]");
