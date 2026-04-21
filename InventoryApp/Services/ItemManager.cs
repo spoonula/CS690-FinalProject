@@ -62,6 +62,12 @@ namespace InventoryApp.Services
                 return false;
             }
 
+            if (ItemNameExists(name))
+            {
+                // no dups!
+                return false;
+            }
+
             item.Name = name;
             item.Description = description;
             item.EstimatedValue = estimatedValue;

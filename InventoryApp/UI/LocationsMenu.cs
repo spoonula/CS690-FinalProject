@@ -56,16 +56,20 @@ class LocationsMenu
         }
     }
 
-    public Location CreateLocationMenu()
+    public void CreateLocationMenu()
     {
 
         AnsiConsole.Clear();
         AnsiConsole.WriteLine("=== Create Location  ===\n");
         
         // Get Item inputs
-        String name = PromptNotEmpty("Enter location name:");
+        String name = LocationNamePrompt("Enter location name:");
 
-        return locationsManager.CreateLocation(name);
+        Location? location = locationsManager.CreateLocation(name);
+        if (location == null)
+        {
+            AnsiConsole.MarkupLine("[red]Location could not create[/]");
+        }
 
     }                
 
@@ -78,8 +82,27 @@ class LocationsMenu
                 .PageSize(10)
                 .UseConverter(location => location.Name)
                 .AddChoices(locationsManager.GetAllLocations())
+                .EnableSearch()
         );
         return selectedLocation;
+    }
+
+    // helpers
+    private string LocationNamePrompt(String? defaultValue = null)
+    {
+        string name;
+        while(true)
+        {
+            name = defaultValue is not null
+            ? PromptNotEmpty("Enter location name:", defaultValue)
+            : PromptNotEmpty("Enter location name:");
+            if (locationsManager.LocationNameExists(name))
+            {
+                AnsiConsole.MarkupLine($"[red]{name} is already a location[/]");
+                continue;
+            }
+            return name;
+        }
     }
 
 }

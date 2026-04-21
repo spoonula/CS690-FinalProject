@@ -27,6 +27,12 @@ namespace InventoryApp.Services
 
         public Location CreateLocation(string name)
         {
+            if (LocationNameExists(name))
+            {
+                // no dups!
+                return null;
+            }
+
             Location location = new Location();
             location.Id = Guid.NewGuid();
             location.Name = name;
@@ -44,6 +50,12 @@ namespace InventoryApp.Services
 
             if (location == null)
             {
+                return false;
+            }
+
+            if (LocationNameExists(name))
+            {
+                // no dups!
                 return false;
             }
 
@@ -66,6 +78,11 @@ namespace InventoryApp.Services
             Save();
 
             return true;
+        }
+
+        public bool LocationNameExists(string name)
+        {
+            return locations.Any(location => location.Name == name);
         }
 
         private void Save()
