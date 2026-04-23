@@ -91,7 +91,7 @@ class LocationsMenu
             var selection = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title($"=== {location.Name} ===")
-                    .AddChoices("Update Location", "Delete Location", "Back")
+                    .AddChoices("Update Location", /*"Delete Location", */"Back")
             );
 
             switch (selection)
