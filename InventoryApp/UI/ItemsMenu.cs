@@ -190,7 +190,7 @@ class ItemsMenu
         AnsiConsole.Clear();
         AnsiConsole.WriteLine("=== Update Item ===\n");
         // Get Item inputs
-        String name = ItemNamePrompt(item.Name);
+        String name = ItemNamePrompt(item.Name, item.Id);
         String description = PromptNotEmpty("Enter item description:", item.Description);
         decimal value = PromptDecimal("Enter estimated value:", false, item.EstimatedValue.ToString());
         AnsiConsole.WriteLine("");
@@ -245,7 +245,7 @@ class ItemsMenu
     }
 
     // helpers
-    private string ItemNamePrompt(String? defaultValue = null)
+    private string ItemNamePrompt(String? defaultValue = null, Guid? itemId = null)
     {
         string name;
         while(true)
@@ -253,7 +253,8 @@ class ItemsMenu
             name = defaultValue is not null
             ? PromptNotEmpty("Enter item name:", defaultValue)
             : PromptNotEmpty("Enter item name:");
-            if (itemManager.ItemNameExists(name))
+            if ((itemManager.ItemNameExists(name) && itemId == null) ||
+            (itemManager.ItemNameExists(name, itemId)))
             {
                 AnsiConsole.MarkupLine($"[red]{name} is already an item[/]");
                 continue;

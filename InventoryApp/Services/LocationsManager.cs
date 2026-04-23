@@ -81,7 +81,7 @@ namespace InventoryApp.Services
         }
 
         public bool LocationNameExists(string name, Guid? ignoreId = null)
-{
+        {
             return locations.Any(location =>
                 location.Name == name &&
                 (ignoreId == null || location.Id != ignoreId));
