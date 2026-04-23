@@ -53,7 +53,7 @@ namespace InventoryApp.Services
                 return false;
             }
 
-            if (LocationNameExists(name))
+            if (LocationNameExists(name, id))
             {
                 // no dups!
                 return false;
@@ -80,9 +80,11 @@ namespace InventoryApp.Services
             return true;
         }
 
-        public bool LocationNameExists(string name)
-        {
-            return locations.Any(location => location.Name == name);
+        public bool LocationNameExists(string name, Guid? ignoreId = null)
+{
+            return locations.Any(location =>
+                location.Name == name &&
+                (ignoreId == null || location.Id != ignoreId));
         }
 
         private void Save()

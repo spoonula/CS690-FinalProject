@@ -20,13 +20,11 @@ class LocationsMenu
     {
         while (true)
         {
-            Location l;
             var options = new List<string>();
             options.Add("Create Location");
             if (locationsManager.GetAllLocations().Count > 0)
             {
-                //options.Add("Update Location");
-                //options.Add("Delete Location");
+                options.Add("Edit/Delete Location");
             }
             options.Add("Back");
             AnsiConsole.Clear();
@@ -43,11 +41,8 @@ class LocationsMenu
                 case "Create Location":
                     CreateLocationMenu();
                     break;
-                case "Update Location":
-                    l = SelectLocationByListMenu();
-                    break;
-                case "Delete Location":
-                    l = SelectLocationByListMenu();
+                case "Edit/Delete Location":
+                    SelectLocationByListMenu();
                     break;
                 default:
                     AnsiConsole.WriteLine(nyi);
@@ -56,25 +51,26 @@ class LocationsMenu
         }
     }
 
-    public void CreateLocationMenu()
+    public Location? CreateLocationMenu()
     {
 
         AnsiConsole.Clear();
         AnsiConsole.WriteLine("=== Create Location  ===\n");
         
-        // Get Item inputs
-        String name = LocationNamePrompt("Enter location name:");
+        // Get inputs
+        String name = LocationNamePrompt();
 
         Location? location = locationsManager.CreateLocation(name);
         if (location == null)
         {
             AnsiConsole.MarkupLine("[red]Location could not create[/]");
         }
+        return location;
 
     }                
 
 
-    Location SelectLocationByListMenu()
+    void SelectLocationByListMenu()
     {
         Location selectedLocation = AnsiConsole.Prompt(
             new SelectionPrompt<Location>()
@@ -84,11 +80,63 @@ class LocationsMenu
                 .AddChoices(locationsManager.GetAllLocations())
                 .EnableSearch()
         );
-        return selectedLocation;
+        LocationActionMenu(selectedLocation);
+    }
+
+    void LocationActionMenu(Location location)
+    {
+        while (true)
+        {
+            AnsiConsole.Clear();
+            var selection = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title($"=== {location.Name} ===")
+                    .AddChoices("Update Location", "Delete Location", "Back")
+            );
+
+            switch (selection)
+            {
+                case "Back":
+                    return;
+                case "Update Location":
+                    UpdateLocationMenu(location);
+                    break;
+                case "Delete Location":
+                    Boolean deleted = DeleteLocation(location);
+                    if(deleted) return;
+                    break;
+                default:
+                    AnsiConsole.WriteLine(nyi);
+                    break;
+            }
+        }
+    }
+
+    void UpdateLocationMenu(Location location)
+    {
+        AnsiConsole.Clear();
+        AnsiConsole.WriteLine("=== Update Location ===\n");
+        // Get inputs
+        String name = LocationNamePrompt(location.Name, location.Id);
+        bool success = locationsManager.UpdateLocation(location.Id, name);
+        if (!success)
+        {
+            AnsiConsole.MarkupLine("[red]Location could not update[/]");
+            System.Console.ReadKey(true);
+        }
+    }
+
+    Boolean DeleteLocation(Location location)
+    {
+        if(AnsiConsole.Confirm($"Are you sure you want to delete {location.Name}", defaultValue:false)) 
+        {
+            return locationsManager.DeleteLocation(location.Id);
+        }
+        return false;
     }
 
     // helpers
-    private string LocationNamePrompt(String? defaultValue = null)
+    private string LocationNamePrompt(String? defaultValue = null, Guid? locationId = null)
     {
         string name;
         while(true)
@@ -96,11 +144,13 @@ class LocationsMenu
             name = defaultValue is not null
             ? PromptNotEmpty("Enter location name:", defaultValue)
             : PromptNotEmpty("Enter location name:");
-            if (locationsManager.LocationNameExists(name))
+            if ((locationId == null && locationsManager.LocationNameExists(name)) ||
+            (locationsManager.LocationNameExists(name, locationId)))
             {
                 AnsiConsole.MarkupLine($"[red]{name} is already a location[/]");
                 continue;
             }
+            
             return name;
         }
     }
