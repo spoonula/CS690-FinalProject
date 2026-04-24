@@ -15,6 +15,7 @@ class App
     private ItemManager itemManager = new ItemManager();
     private LocationsManager locationsManager = new LocationsManager();
     private BorrowersManager borrowersManager = new BorrowersManager();
+    private LoansManager loansManager = new LoansManager();
 
     public void Run()
     {
@@ -37,7 +38,7 @@ class App
                 case "Exit":
                     return;
                 case "Items":
-                    var itemsMenu = new ItemsMenu(itemManager, locationsManager);
+                    var itemsMenu = new ItemsMenu(itemManager, locationsManager, borrowersManager, loansManager);
                     itemsMenu.Show();
                     break;
                 case "Locations":

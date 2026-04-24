@@ -52,4 +52,24 @@ public static class PromptHelpers
         }
     }
 
+    public static DateTime PromptDate(String prompt, String? defaultValue = null)
+    {
+        DateTime value;
+        String input;
+
+        while (true)
+        {
+            input = defaultValue is not null
+                ? AnsiConsole.Ask<string>(prompt, defaultValue)
+                : AnsiConsole.Ask<string>(prompt);
+
+            if (DateTime.TryParse(input, out value))
+            {
+                return value.Date;
+            }
+
+            AnsiConsole.MarkupLine("[red]Please enter a valid date[/]");
+        }
+    }
+
 }
