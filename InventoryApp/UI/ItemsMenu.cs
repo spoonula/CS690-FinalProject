@@ -12,11 +12,19 @@ class ItemsMenu
     const String nyi = "Not yet implemented";
     private ItemManager itemManager;
     private LocationsManager locationsManager;
+    private BorrowersManager borrowersManager;
+    private LoansManager loansManager;
 
-    public ItemsMenu(ItemManager itemManager, LocationsManager locationsManager) 
+    public ItemsMenu(
+        ItemManager itemManager,
+        LocationsManager locationsManager,
+        BorrowersManager borrowersManager,
+        LoansManager loansManager) 
     {
         this.itemManager = itemManager;
         this.locationsManager = locationsManager;
+        this.borrowersManager = borrowersManager;
+        this.loansManager = loansManager;
     }
 
     public void Show()
@@ -153,11 +161,29 @@ class ItemsMenu
         while (true)
         {
             AnsiConsole.Clear();
+            var options = new List<string>
+            {
+                "View Details",
+                "Update Item",
+                "Delete Item",
+                "Assign / Change Location"
+            };
+
+            if (loansManager.ItemIsLoaned(item.Id))
+            {
+                options.Add("Mark as Returned");
+            }
+            else
+            {
+                options.Add("Mark as Loaned");
+            }
+
+            options.Add("Back");
+
             var selection = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title($"=== {item.Name} ===")
-                    .AddChoices("View Details", /*"Update Item", */"Delete Item", "Assign / Change Location", 
-                    /*"Mark as Loaned", "Mark as Returned", */"Back")
+                    .AddChoices(options)
             );
 
             switch (selection)
@@ -167,9 +193,18 @@ class ItemsMenu
                 case "View Details":
                     PrintItemDetails(item);
                     break;
+                case "Update Item":
+                    UpdateItemMenu(item);
+                    break;
                 case "Delete Item":
                     Boolean deleted = DeleteItem(item);
                     if(deleted) return;
+                    break;
+                case "Mark as Loaned":
+                    MarkItemLoanedMenu(item);
+                    break;
+                case "Mark as Returned":
+                    MarkItemReturnedMenu(item);
                     break;
                 case "Assign / Change Location":
                     UpdateItemLocation(item);
@@ -178,6 +213,24 @@ class ItemsMenu
                     AnsiConsole.WriteLine(nyi);
                     break;
             }
+        }
+    }
+
+    void UpdateItemMenu(Item item)
+    {
+
+        AnsiConsole.Clear();
+        AnsiConsole.WriteLine("=== Update Item ===\n");
+        // Get Item inputs
+        String name = ItemNamePrompt(item.Name, item.Id);
+        String description = PromptNotEmpty("Enter item description:", item.Description);
+        decimal value = PromptDecimal("Enter estimated value:", false, item.EstimatedValue.ToString());
+        AnsiConsole.WriteLine("");
+        bool success = itemManager.UpdateItem(item.Id, name, description, value, item.LocationId);
+        if (!success)
+        {
+            AnsiConsole.MarkupLine("[red]Item could not update[/]");
+            System.Console.ReadKey(true);
         }
     }
 
@@ -195,6 +248,7 @@ class ItemsMenu
     void PrintItemDetails(Item item)
     {
         string locationText;
+        Loan? loan = loansManager.GetActiveLoanByItemId(item.Id);
         if (item.LocationId is Guid locationId)
         {
             var location = locationsManager.GetLocationById(locationId);
@@ -209,28 +263,196 @@ class ItemsMenu
         AnsiConsole.MarkupLine($"[bold]Description: [/] {item.Description}");
         AnsiConsole.MarkupLine($"[bold]Location: [/] {locationText}");
         AnsiConsole.MarkupLine($"[bold]Value: [/] {item.EstimatedValue.ToString("C", CultureInfo.GetCultureInfo("en-US"))}");
-        AnsiConsole.MarkupLine($"[bold]Loan Status: [/] [red]{nyi}[/]");
+        if (loan == null)
+        {
+            AnsiConsole.MarkupLine("[bold]Loan Status: [/] Available");
+        }
+        else
+        {
+            Borrower? borrower = borrowersManager.GetBorrowerById(loan.BorrowerId);
+            string borrowerName = borrower != null ? borrower.Name : "Unknown borrower";
+
+            AnsiConsole.MarkupLine("[bold]Loan Status: [/] [yellow]Loaned[/]");
+            AnsiConsole.MarkupLine($"[bold]Borrower: [/] {borrowerName}");
+            AnsiConsole.MarkupLine($"[bold]Loan Date: [/] {loan.LoanDate.ToShortDateString()}");
+            AnsiConsole.MarkupLine($"[bold]Expected Return: [/] {loan.ExpectedReturnDate.ToShortDateString()}");
+        }
         AnsiConsole.WriteLine("\nAny key to return");
         Console.ReadKey(true);
     }
 
-    Boolean DeleteItem(Item item)
+    void MarkItemLoanedMenu(Item item)
     {
-        if(AnsiConsole.Confirm($"Are you sure you want to delete {item.Name}", defaultValue:false)) 
+        AnsiConsole.Clear();
+        AnsiConsole.WriteLine($"=== Loan {item.Name} ===\n");
+
+        Borrower? borrower = null;
+        borrower = BorrowerSelectMenu(borrower, true);
+
+        if (borrower == null)
         {
+            return;
+        }
+
+        DateTime loanDate = PromptDate("Enter loan date:", DateTime.Today.ToShortDateString());
+        DateTime expectedReturnDate = PromptDate("Enter expected return date:");
+
+        Loan? loan = loansManager.CreateLoan(
+            item.Id,
+            borrower.Id,
+            loanDate,
+            expectedReturnDate
+        );
+
+        if (loan == null)
+        {
+            AnsiConsole.MarkupLine("[red]Item could not be marked as loaned[/]");
+            Console.ReadKey(true);
+        }
+
+        itemManager.UpdateItem(
+            item.Id,
+            item.Name,
+            item.Description,
+            item.EstimatedValue,
+            null
+        );
+    }
+
+    void MarkItemReturnedMenu(Item item)
+    {
+        AnsiConsole.Clear();
+        AnsiConsole.WriteLine($"=== Return {item.Name} ===\n");
+
+        Loan? loan = loansManager.GetActiveLoanByItemId(item.Id);
+
+        if (loan == null)
+        {
+            AnsiConsole.MarkupLine("[red]This item is not currently loaned[/]");
+            Console.ReadKey(true);
+            return;
+        }
+
+        Borrower? borrower = borrowersManager.GetBorrowerById(loan.BorrowerId);
+        string borrowerName = borrower != null ? borrower.Name : "Unknown borrower";
+
+        AnsiConsole.MarkupLine($"[bold]Borrower:[/] {borrowerName}");
+        AnsiConsole.MarkupLine($"[bold]Loan Date:[/] {loan.LoanDate.ToShortDateString()}");
+        AnsiConsole.MarkupLine($"[bold]Expected Return:[/] {loan.ExpectedReturnDate.ToShortDateString()}");
+        AnsiConsole.WriteLine();
+
+        if (AnsiConsole.Confirm("Mark this item as returned?", defaultValue: true))
+        {
+            DateTime returnedDate = PromptDate(
+                "Enter returned date:",
+                DateTime.Today.ToShortDateString()
+            );
+
+            bool success = loansManager.MarkReturned(item.Id, returnedDate);
+
+            if (!success)
+            {
+                AnsiConsole.MarkupLine("[red]Item could not be marked as returned[/]");
+                Console.ReadKey(true);
+                return;
+            }
+
+            if (AnsiConsole.Confirm("Would you like to set a return location?", defaultValue: true))
+            {
+                Location? location = LocationSelectMenu(null, true, false);
+
+                if (location != null)
+                {
+                    itemManager.UpdateItem(
+                        item.Id,
+                        item.Name,
+                        item.Description,
+                        item.EstimatedValue,
+                        location.Id
+                    );
+                }
+            }
+        }
+    }
+
+    bool DeleteItem(Item item)
+    {
+        Loan? activeLoan = loansManager.GetActiveLoanByItemId(item.Id);
+
+        string message;
+
+        if (activeLoan == null)
+        {
+            message = $"Are you sure you want to delete {item.Name}?";
+        }
+        else
+        {
+            Borrower? borrower = borrowersManager.GetBorrowerById(activeLoan.BorrowerId);
+            string borrowerName = borrower != null ? borrower.Name : "Unknown borrower";
+
+            message = $"{item.Name} is currently loaned to {borrowerName}. Are you sure you want to delete it?";
+        }
+
+        if (AnsiConsole.Confirm(message, defaultValue: false))
+        {
+            loansManager.DeleteLoansForItem(item.Id);
             return itemManager.DeleteItem(item.Id);
         }
+
         return false;
     }
 
+    Borrower? BorrowerSelectMenu(Borrower? currentBorrower, bool allowCreate)
+    {
+        Borrower? b = currentBorrower;
+
+        var borrowers = borrowersManager.GetAllBorrowers();
+
+        var options = borrowers.Select(borrower => borrower.Name).ToList();
+
+        if (allowCreate)
+        {
+            options.Add("Create New Borrower");
+        }
+
+        options.Add("Back");
+
+        var selection = AnsiConsole.Prompt(
+            new SelectionPrompt<string>()
+                .Title("=== Select a borrower === ")
+                .AddChoices(options)
+        );
+
+        switch (selection)
+        {
+            case "Create New Borrower":
+                BorrowersMenu borrowersMenu = new BorrowersMenu(borrowersManager);
+                b = borrowersMenu.CreateBorrowerMenu();
+                break;
+
+            case "Back":
+                break;
+
+            default:
+                int index = options.IndexOf(selection);
+                b = borrowers[index];
+                break;
+        }
+
+        return b;
+    }
+
     // helpers
-    private string ItemNamePrompt()
+    private string ItemNamePrompt(String? defaultValue = null, Guid? itemId = null)
     {
         string name;
         while(true)
         {
-            name = PromptNotEmpty("Enter item name:");
-            if (itemManager.ItemNameExists(name))
+            name = defaultValue is not null
+            ? PromptNotEmpty("Enter item name:", defaultValue)
+            : PromptNotEmpty("Enter item name:");
+            if ((itemManager.ItemNameExists(name) && itemId == null) ||
+            (itemManager.ItemNameExists(name, itemId)))
             {
                 AnsiConsole.MarkupLine($"[red]{name} is already an item[/]");
                 continue;

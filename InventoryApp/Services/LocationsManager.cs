@@ -9,9 +9,9 @@ namespace InventoryApp.Services
         private JsonStore<Location> store;
         private List<Location> locations;
 
-        public LocationsManager()
+        public LocationsManager(string filePath = "Data/locations.json")
         {
-            store = new JsonStore<Location>("Data/locations.json");
+            store = new JsonStore<Location>(filePath);
             locations = store.Load();
         }
 
@@ -25,8 +25,14 @@ namespace InventoryApp.Services
             return locations.FirstOrDefault(location => location.Id == id);
         }
 
-        public Location CreateLocation(string name)
+        public Location? CreateLocation(string name)
         {
+            if (LocationNameExists(name))
+            {
+                // no dups!
+                return null;
+            }
+
             Location location = new Location();
             location.Id = Guid.NewGuid();
             location.Name = name;
@@ -44,6 +50,12 @@ namespace InventoryApp.Services
 
             if (location == null)
             {
+                return false;
+            }
+
+            if (LocationNameExists(name, id))
+            {
+                // no dups!
                 return false;
             }
 
@@ -66,6 +78,13 @@ namespace InventoryApp.Services
             Save();
 
             return true;
+        }
+
+        public bool LocationNameExists(string name, Guid? ignoreId = null)
+        {
+            return locations.Any(location =>
+                location.Name == name &&
+                (ignoreId == null || location.Id != ignoreId));
         }
 
         private void Save()

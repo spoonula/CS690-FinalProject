@@ -9,9 +9,9 @@ namespace InventoryApp.Services
         private JsonStore<Item> store;
         private List<Item> items;
 
-        public ItemManager()
+        public ItemManager(string filePath = "Data/items.json")
         {
-            store = new JsonStore<Item>("Data/items.json");
+            store = new JsonStore<Item>(filePath);
             items = store.Load();
         }
 
@@ -62,6 +62,12 @@ namespace InventoryApp.Services
                 return false;
             }
 
+            if (ItemNameExists(name, id))
+            {
+                // no dups!
+                return false;
+            }
+
             item.Name = name;
             item.Description = description;
             item.EstimatedValue = estimatedValue;
@@ -92,10 +98,13 @@ namespace InventoryApp.Services
             return items.Any(item => item.LocationId == locationId);
         }
 
-        public bool ItemNameExists(string name)
+        public bool ItemNameExists(string name, Guid? ignoreId = null)
         {
-            return items.Any(item => item.Name == name);
+            return items.Any(item =>
+                item.Name == name &&
+                (ignoreId == null || item.Id != ignoreId));
         }
+
 
         private void Save()
         {

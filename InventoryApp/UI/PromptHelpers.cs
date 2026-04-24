@@ -4,11 +4,13 @@ using Spectre.Console;
 
 public static class PromptHelpers
 {
-    public static String PromptNotEmpty(String prompt)
+    public static String PromptNotEmpty(String prompt, String? defaultValue = null)
     {
         String response = "";
         do {
-            response = AnsiConsole.Ask<string>(prompt);
+            response =  defaultValue is not null
+            ? response = AnsiConsole.Ask<string>(prompt, defaultValue)
+            : response = AnsiConsole.Ask<string>(prompt);
             if (string.IsNullOrWhiteSpace(response))
             {
                 AnsiConsole.MarkupLine("[red]Your response must not be empty[/]");
@@ -17,13 +19,15 @@ public static class PromptHelpers
         return response;
     }
 
-    public static decimal PromptDecimal(String prompt, Boolean allowNegative)
+    public static decimal PromptDecimal(String prompt, Boolean allowNegative, String? defaultValue=null)
     {
         decimal value;
+        String input = "0";
         while (true)
         {
-            String input = AnsiConsole.Ask<string>(prompt);
-
+            input = defaultValue is not null
+            ? AnsiConsole.Ask<string>(prompt, defaultValue)
+            : AnsiConsole.Ask<string>(prompt);
             if (string.IsNullOrWhiteSpace(input))
             {
                 AnsiConsole.MarkupLine("[red]Your response must not be empty[/]");
@@ -45,6 +49,26 @@ public static class PromptHelpers
                 continue;
             }
             return value;
+        }
+    }
+
+    public static DateTime PromptDate(String prompt, String? defaultValue = null)
+    {
+        DateTime value;
+        String input;
+
+        while (true)
+        {
+            input = defaultValue is not null
+                ? AnsiConsole.Ask<string>(prompt, defaultValue)
+                : AnsiConsole.Ask<string>(prompt);
+
+            if (DateTime.TryParse(input, out value))
+            {
+                return value.Date;
+            }
+
+            AnsiConsole.MarkupLine("[red]Please enter a valid date[/]");
         }
     }
 
