@@ -8,9 +8,9 @@ namespace InventoryApp.Services
         private JsonStore<Loan> store;
         private List<Loan> loans;
 
-        public LoansManager()
+        public LoansManager(string filePath = "Data/loans.json")
         {
-            store = new JsonStore<Loan>("Data/loans.json");
+            store = new JsonStore<Loan>(filePath);
             loans = store.Load();
         }
 

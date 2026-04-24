@@ -9,9 +9,9 @@ namespace InventoryApp.Services
         private JsonStore<Item> store;
         private List<Item> items;
 
-        public ItemManager()
+        public ItemManager(string filePath = "Data/items.json")
         {
-            store = new JsonStore<Item>("Data/items.json");
+            store = new JsonStore<Item>(filePath);
             items = store.Load();
         }
 

@@ -9,9 +9,9 @@ namespace InventoryApp.Services
         private JsonStore<Borrower> store;
         private List<Borrower> borrowers;
 
-        public BorrowersManager()
+        public BorrowersManager(string filePath = "Data/borrowers.json")
         {
-            store = new JsonStore<Borrower>("Data/borrowers.json");
+            store = new JsonStore<Borrower>(filePath);
             borrowers = store.Load();
         }
 

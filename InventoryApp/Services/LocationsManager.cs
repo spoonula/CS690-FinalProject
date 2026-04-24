@@ -9,9 +9,9 @@ namespace InventoryApp.Services
         private JsonStore<Location> store;
         private List<Location> locations;
 
-        public LocationsManager()
+        public LocationsManager(string filePath = "Data/locations.json")
         {
-            store = new JsonStore<Location>("Data/locations.json");
+            store = new JsonStore<Location>(filePath);
             locations = store.Load();
         }
 
