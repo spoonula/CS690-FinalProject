@@ -16,6 +16,17 @@ class App
     private LocationsManager locationsManager = new LocationsManager();
     private BorrowersManager borrowersManager = new BorrowersManager();
     private LoansManager loansManager = new LoansManager();
+    private ReportsManager reportsManager;
+
+    public App()
+    {
+        this.reportsManager = new ReportsManager(
+            itemManager,
+            locationsManager,
+            loansManager,
+            borrowersManager
+        );
+    }
 
     public void Run()
     {
@@ -50,7 +61,7 @@ class App
                     borrowersMenu.Show();
                     break;
                 case "Reports":
-                    var reportsMenu = new ReportsMenu(itemManager, locationsManager);
+                    var reportsMenu = new ReportsMenu(reportsManager);
                     reportsMenu.Show();
                     break;   
                 default:

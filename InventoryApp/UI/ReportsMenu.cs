@@ -2,19 +2,14 @@ namespace InventoryApp;
 
 using Spectre.Console;
 using InventoryApp.Services;
-using InventoryApp.Models;
-using System.Globalization;
-using CsvHelper;
 
 class ReportsMenu
 {
-    private ItemManager itemManager;
-    private LocationsManager locationsManager;
+    private ReportsManager reportsManager;
 
-    public ReportsMenu(ItemManager itemManager, LocationsManager locationsManager) 
+    public ReportsMenu(ReportsManager reportsManager)
     {
-        this.itemManager = itemManager;
-        this.locationsManager = locationsManager;
+        this.reportsManager = reportsManager;
     }
 
     public void Show()
@@ -22,22 +17,28 @@ class ReportsMenu
         while (true)
         {
             AnsiConsole.Clear();
+
             var selection = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
-                    .Title("=== Items ===")
-                    .AddChoices("Inventory Report",/* "Loan Report", */"Back")
+                    .Title("=== Reports ===")
+                    .AddChoices(
+                        "Inventory Report",
+                        "Loaned Items Report",
+                        "Back"
+                    )
             );
 
             switch (selection)
             {
                 case "Back":
                     return;
+
                 case "Inventory Report":
                     InventoryReportMenu();
                     break;
-                case "Loan Report":
-                    break;
-                default:
+
+                case "Loaned Items Report":
+                    LoanedItemsReportMenu();
                     break;
             }
         }
@@ -45,52 +46,31 @@ class ReportsMenu
 
     void InventoryReportMenu()
     {
-        if(AnsiConsole.Confirm("Ready to Generate Inventory Report?"))
+        bool includeLoanedItems = AnsiConsole.Confirm(
+            "Include loaned items in the inventory report?",
+            defaultValue: true
+        );
+
+        if (AnsiConsole.Confirm("Ready to generate inventory report?"))
         {
-            GenerateInventoryReport();
-        }      
-    }
-
-    private void GenerateInventoryReport()
-    {
-        var items = itemManager.GetAllItems();
-        var locations = locationsManager.GetAllLocations();
-
-        var reportRows = items.Select(item =>
-        {
-            var locationName = "Unassigned";
-            if (item.LocationId is Guid locationId)
-            {
-                var location = locations.FirstOrDefault(l => l.Id == locationId);
-                if (location != null)
-                {
-                    locationName = location.Name;
-                }
-            }
-            return new
-            {
-                ItemName = item.Name,
-                Location = locationName,
-                EstimatedValue = item.EstimatedValue.ToString("F2")
-            };
-        });
-
-       WriteReport(reportRows, "inventory-report");
-    }
-
-    private void WriteReport<T>(IEnumerable<T> rows, string reportName)
-    {
-        Directory.CreateDirectory("Reports");
-        var timestamp = DateTime.Now.ToString("yyyy-MM-dd-HHmm");
-        var filePath = $"Reports/{reportName}-{timestamp}.csv";
-
-        using (var writer = new StreamWriter(filePath))
-        using (var csv = new CsvHelper.CsvWriter(writer, System.Globalization.CultureInfo.InvariantCulture))
-        {
-            csv.WriteRecords(rows);
+            string filePath = reportsManager.GenerateInventoryReport(includeLoanedItems);
+            ReportGeneratedMessage(filePath);
         }
-        Spectre.Console.AnsiConsole.MarkupLine($"[green]Report generated:[/] {filePath}");
-        Spectre.Console.AnsiConsole.WriteLine("Any key to continue");
-        System.Console.ReadKey(true);
+    }
+
+    void LoanedItemsReportMenu()
+    {
+        if (AnsiConsole.Confirm("Ready to generate loaned items report?"))
+        {
+            string filePath = reportsManager.GenerateLoanedItemsReport();
+            ReportGeneratedMessage(filePath);
+        }
+    }
+
+    void ReportGeneratedMessage(string filePath)
+    {
+        AnsiConsole.MarkupLine($"[green]Report generated:[/] {filePath}");
+        AnsiConsole.WriteLine("Any key to continue");
+        Console.ReadKey(true);
     }
 }

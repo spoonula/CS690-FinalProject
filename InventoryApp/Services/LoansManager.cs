@@ -68,6 +68,18 @@ namespace InventoryApp.Services
             return true;
         }
 
+        public List<Loan> GetAllLoans()
+        {
+            return loans;
+        }
+
+        public List<Loan> GetActiveLoans()
+        {
+            return loans
+                .Where(loan => loan.ReturnedDate == null)
+                .ToList();
+        }
+
         private void Save()
         {
             store.Save(loans);
