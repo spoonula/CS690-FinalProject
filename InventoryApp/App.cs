@@ -14,6 +14,7 @@ class App
     const String nyi = "Not yet implemented";
     private ItemManager itemManager = new ItemManager();
     private LocationsManager locationsManager = new LocationsManager();
+    private BorrowersManager borrowersManager = new BorrowersManager();
 
     public void Run()
     {
@@ -28,7 +29,7 @@ class App
             var selection = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title("=== Main Menu ===")
-                    .AddChoices("Items", "Locations", /*"Borrowers", */"Reports", "Exit")
+                    .AddChoices("Items", "Locations", "Borrowers", "Reports", "Exit")
             );
 
             switch (selection)
@@ -43,6 +44,10 @@ class App
                     var locationsMenu = new LocationsMenu(locationsManager);
                     locationsMenu.Show();     
                     break;   
+                case "Borrowers":
+                    var borrowersMenu = new BorrowersMenu(borrowersManager);
+                    borrowersMenu.Show();
+                    break;
                 case "Reports":
                     var reportsMenu = new ReportsMenu(itemManager, locationsManager);
                     reportsMenu.Show();

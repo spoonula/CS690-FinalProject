@@ -25,7 +25,7 @@ namespace InventoryApp.Services
             return locations.FirstOrDefault(location => location.Id == id);
         }
 
-        public Location CreateLocation(string name)
+        public Location? CreateLocation(string name)
         {
             if (LocationNameExists(name))
             {
