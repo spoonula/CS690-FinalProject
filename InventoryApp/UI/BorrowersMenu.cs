@@ -95,7 +95,7 @@ class BorrowersMenu
             var selection = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title($"=== {borrower.Name} ===")
-                    .AddChoices("Update Borrower", "Delete Borrower", "Back")
+                    .AddChoices("Update Borrower", /*"Delete Borrower",*/ "Back")
             );
 
             switch (selection)
