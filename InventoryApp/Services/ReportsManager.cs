@@ -11,16 +11,20 @@ namespace InventoryApp.Services
         private LoansManager loansManager;
         private BorrowersManager borrowersManager;
 
+        private string reportDirectory;
+
         public ReportsManager(
             ItemManager itemManager,
             LocationsManager locationsManager,
             LoansManager loansManager,
-            BorrowersManager borrowersManager)
+            BorrowersManager borrowersManager,
+            string reportDirectory = "Reports")
         {
             this.itemManager = itemManager;
             this.locationsManager = locationsManager;
             this.loansManager = loansManager;
             this.borrowersManager = borrowersManager;
+            this.reportDirectory = reportDirectory;
         }
 
         public string GenerateInventoryReport(bool includeLoanedItems)
@@ -88,10 +92,10 @@ namespace InventoryApp.Services
 
         private string WriteReport<T>(IEnumerable<T> rows, string reportName)
         {
-            Directory.CreateDirectory("Reports");
+            Directory.CreateDirectory(reportDirectory);
 
-            string timestamp = DateTime.Now.ToString("yyyy-MM-dd-HHmm");
-            string filePath = $"Reports/{reportName}-{timestamp}.csv";
+            string timestamp = DateTime.Now.ToString("yyyy-MM-dd-HHmmssfff");
+            string filePath = Path.Combine(reportDirectory, $"{reportName}-{timestamp}.csv");
 
             using (var writer = new StreamWriter(filePath))
             using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
