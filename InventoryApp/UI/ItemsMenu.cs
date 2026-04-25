@@ -359,7 +359,7 @@ class ItemsMenu
 
             if (AnsiConsole.Confirm("Would you like to set a return location?", defaultValue: true))
             {
-                Location? location = LocationSelectMenu(null, true, false);
+                Location? location = SetReturnLocationForItem(item);
 
                 if (location != null)
                 {
@@ -371,6 +371,25 @@ class ItemsMenu
                         location.Id
                     );
                 }
+            }
+        }
+    }
+
+    public void SetReturnLocationForItem(Item item)
+    {
+        if (AnsiConsole.Confirm("Would you like to set a return location?", defaultValue: true))
+        {
+            Location? location = LocationSelectMenu(null, true, false);
+
+            if (location != null)
+            {
+                itemManager.UpdateItem(
+                    item.Id,
+                    item.Name,
+                    item.Description,
+                    item.EstimatedValue,
+                    location.Id
+                );
             }
         }
     }
@@ -426,7 +445,7 @@ class ItemsMenu
         switch (selection)
         {
             case "Create New Borrower":
-                BorrowersMenu borrowersMenu = new BorrowersMenu(borrowersManager);
+                BorrowersMenu borrowersMenu = new BorrowersMenu(borrowersManager, loansManager, itemManager, locationsManager);
                 b = borrowersMenu.CreateBorrowerMenu();
                 break;
 

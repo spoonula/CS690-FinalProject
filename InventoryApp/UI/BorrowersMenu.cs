@@ -9,10 +9,20 @@ class BorrowersMenu
 {
     const string nyi = "Not yet implemented";
     private BorrowersManager borrowersManager;
+    private LoansManager loansManager;
+    private ItemManager itemManager;
+    private LocationsManager locationsManager;
 
-    public BorrowersMenu(BorrowersManager borrowersManager)
+    public BorrowersMenu(
+        BorrowersManager borrowersManager,
+        LoansManager loansManager,
+        ItemManager itemManager,
+        LocationsManager locationsManager)
     {
         this.borrowersManager = borrowersManager;
+        this.loansManager = loansManager;
+        this.itemManager = itemManager;
+        this.locationsManager = locationsManager;
     }
 
     public void Show()
@@ -95,7 +105,7 @@ class BorrowersMenu
             var selection = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title($"=== {borrower.Name} ===")
-                    .AddChoices("Update Borrower", /*"Delete Borrower",*/ "Back")
+                    .AddChoices("Update Borrower", "Delete Borrower", "Back")
             );
 
             switch (selection)
@@ -134,7 +144,94 @@ class BorrowersMenu
 
     bool DeleteBorrower(Borrower borrower)
     {
-        if (AnsiConsole.Confirm($"Are you sure you want to delete {borrower.Name}?", defaultValue: false))
+        var activeLoans = loansManager.GetActiveLoansByBorrowerId(borrower.Id);
+
+        if (activeLoans.Count == 0)
+        {
+            if (AnsiConsole.Confirm($"Are you sure you want to delete {borrower.Name}?", false))
+            {
+                return borrowersManager.DeleteBorrower(borrower.Id);
+            }
+
+            return false;
+        }
+
+        AnsiConsole.MarkupLine(
+            $"[yellow]{borrower.Name} currently has {activeLoans.Count} item(s) loaned.[/]"
+        );
+
+        var selection = AnsiConsole.Prompt(
+            new SelectionPrompt<string>()
+                .Title("What would you like to do?")
+                .AddChoices(
+                    "Return all loaned items",
+                    "Remove loaned items from inventory",
+                    "Back"
+                )
+        );
+
+        switch (selection)
+        {
+            case "Return all loaned items":
+            if (!AnsiConsole.Confirm(
+                "This will mark all active loans for this borrower as returned. Continue?",
+                false))
+            {
+                return false;
+            }
+
+            DateTime returnedDate = PromptDate(
+                "Enter returned date:",
+                DateTime.Today.ToShortDateString()
+            );
+
+            ItemsMenu itemsMenu = new ItemsMenu(
+                itemManager,
+                locationsManager,
+                borrowersManager,
+                loansManager
+            );
+
+            foreach (Loan loan in activeLoans)
+            {
+                Item? item = itemManager.GetItemById(loan.ItemId);
+
+                if (item == null)
+                {
+                    continue;
+                }
+
+                bool success = loansManager.MarkReturned(item.Id, returnedDate);
+
+                if (success)
+                {
+                    AnsiConsole.Clear();
+                    AnsiConsole.WriteLine($"=== Return {item.Name} ===\n");
+                    itemsMenu.SetReturnLocationForItem(item);
+                }
+            }
+
+            break;
+
+            case "Remove loaned items from inventory":
+                if (!AnsiConsole.Confirm(
+                    "This will permanently delete the loaned items from inventory and remove their loan records. Continue?",
+                    false))
+                {
+                    return false;
+                }
+
+                List<Guid> itemIds = activeLoans.Select(loan => loan.ItemId).ToList();
+
+                loansManager.DeleteLoansForBorrower(borrower.Id);
+                itemManager.DeleteItemsByIds(itemIds);
+                break;
+
+            case "Back":
+                return false;
+        }
+
+        if (AnsiConsole.Confirm($"Now delete {borrower.Name}?", false))
         {
             return borrowersManager.DeleteBorrower(borrower.Id);
         }

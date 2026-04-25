@@ -57,7 +57,7 @@ class App
                     locationsMenu.Show();     
                     break;   
                 case "Borrowers":
-                    var borrowersMenu = new BorrowersMenu(borrowersManager);
+                    var borrowersMenu = new BorrowersMenu(borrowersManager, loansManager, itemManager, locationsManager);
                     borrowersMenu.Show();
                     break;
                 case "Reports":

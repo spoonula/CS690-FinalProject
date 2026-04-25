@@ -116,6 +116,13 @@ namespace InventoryApp.Services
                 (ignoreId == null || item.Id != ignoreId));
         }
 
+        public bool DeleteItemsByIds(List<Guid> itemIds)
+        {
+            items.RemoveAll(item => itemIds.Contains(item.Id));
+            Save();
+            return true;
+        }
+
 
         private void Save()
         {
