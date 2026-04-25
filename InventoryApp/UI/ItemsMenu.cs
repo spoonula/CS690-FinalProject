@@ -375,7 +375,7 @@ class ItemsMenu
         }
     }
 
-    public void SetReturnLocationForItem(Item item)
+    public Location? SetReturnLocationForItem(Item item)
     {
         if (AnsiConsole.Confirm("Would you like to set a return location?", defaultValue: true))
         {
@@ -390,8 +390,10 @@ class ItemsMenu
                     item.EstimatedValue,
                     location.Id
                 );
+                return location;
             }
         }
+        return null;
     }
 
     bool DeleteItem(Item item)
