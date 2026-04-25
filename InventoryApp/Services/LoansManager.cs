@@ -80,6 +80,36 @@ namespace InventoryApp.Services
                 .ToList();
         }
 
+        public List<Loan> GetActiveLoansByBorrowerId(Guid borrowerId)
+        {
+            return loans
+                .Where(loan => loan.BorrowerId == borrowerId && loan.ReturnedDate == null)
+                .ToList();
+        }
+
+        public bool BorrowerHasActiveLoans(Guid borrowerId)
+        {
+            return GetActiveLoansByBorrowerId(borrowerId).Count > 0;
+        }
+
+        public bool MarkActiveLoansReturnedForBorrower(Guid borrowerId, DateTime returnedDate)
+        {
+            foreach (Loan loan in GetActiveLoansByBorrowerId(borrowerId))
+            {
+                loan.ReturnedDate = returnedDate.Date;
+            }
+
+            Save();
+            return true;
+        }
+
+        public bool DeleteLoansForBorrower(Guid borrowerId)
+        {
+            loans.RemoveAll(loan => loan.BorrowerId == borrowerId);
+            Save();
+            return true;
+        }
+
         private void Save()
         {
             store.Save(loans);

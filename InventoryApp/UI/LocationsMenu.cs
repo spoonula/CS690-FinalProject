@@ -11,9 +11,12 @@ class LocationsMenu
     const String nyi = "Not yet implemented";
     private LocationsManager locationsManager;
 
-    public LocationsMenu(LocationsManager locationsManager) 
+    private ItemManager itemManager;
+
+    public LocationsMenu(LocationsManager locationsManager, ItemManager itemManager)
     {
         this.locationsManager = locationsManager;
+        this.itemManager = itemManager;
     }
 
     public void Show()
@@ -91,7 +94,7 @@ class LocationsMenu
             var selection = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title($"=== {location.Name} ===")
-                    .AddChoices("Update Location", /*"Delete Location", */"Back")
+                    .AddChoices("Update Location", "Delete Location", "Back")
             );
 
             switch (selection)
@@ -126,12 +129,72 @@ class LocationsMenu
         }
     }
 
-    Boolean DeleteLocation(Location location)
+    bool DeleteLocation(Location location)
     {
-        if(AnsiConsole.Confirm($"Are you sure you want to delete {location.Name}", defaultValue:false)) 
+        if (!itemManager.LocationHasItems(location.Id))
+        {
+            if (AnsiConsole.Confirm($"Are you sure you want to delete {location.Name}?", false))
+            {
+                return locationsManager.DeleteLocation(location.Id);
+            }
+
+            return false;
+        }
+
+        var choices = new List<string>();
+
+        if (locationsManager.GetAllLocations()
+            .Any(existingLocation => existingLocation.Id != location.Id))
+        {
+            choices.Add("Transfer items to existing location");
+        }
+
+        choices.Add("Create new location and transfer items");
+        choices.Add("Clear location from items");
+        choices.Add("Back");
+
+        var selection = AnsiConsole.Prompt(
+            new SelectionPrompt<string>()
+                .Title($"{location.Name} contains items. What would you like to do?")
+                .AddChoices(choices)
+        );
+
+        switch (selection)
+        {
+            case "Transfer items to existing location":
+                Location? target = SelectExistingLocation(location.Id);
+                if (target == null) return false;
+
+                itemManager.AssignItemsToLocation(location.Id, target.Id);
+                break;
+
+            case "Create new location and transfer items":
+                Location? newLocation = CreateLocationMenu();
+                if (newLocation == null) return false;
+
+                itemManager.AssignItemsToLocation(location.Id, newLocation.Id);
+                break;
+
+            case "Clear location from items":
+                if (!AnsiConsole.Confirm(
+                    $"This will make all items in {location.Name} unassigned. Continue?",
+                    false))
+                {
+                    return false;
+                }
+
+                itemManager.AssignItemsToLocation(location.Id, null);
+                break;
+
+            case "Back":
+                return false;
+        }
+
+        if (AnsiConsole.Confirm($"Now delete {location.Name}?", false))
         {
             return locationsManager.DeleteLocation(location.Id);
         }
+
         return false;
     }
 
@@ -153,6 +216,28 @@ class LocationsMenu
             
             return name;
         }
+    }
+
+    Location? SelectExistingLocation(Guid locationIdToExclude)
+    {
+        var locations = locationsManager.GetAllLocations()
+            .Where(location => location.Id != locationIdToExclude)
+            .ToList();
+
+        if (locations.Count == 0)
+        {
+            AnsiConsole.MarkupLine("[red]No other locations exist.[/]");
+            return null;
+        }
+
+        return AnsiConsole.Prompt(
+            new SelectionPrompt<Location>()
+                .Title("=== Select a location ===")
+                .PageSize(10)
+                .UseConverter(location => location.Name)
+                .AddChoices(locations)
+                .EnableSearch()
+        );
     }
 
 }

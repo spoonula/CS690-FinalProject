@@ -98,11 +98,29 @@ namespace InventoryApp.Services
             return items.Any(item => item.LocationId == locationId);
         }
 
+        public bool AssignItemsToLocation(Guid oldLocationId, Guid? newLocationId)
+        {
+            foreach (Item item in items.Where(item => item.LocationId == oldLocationId))
+            {
+                item.LocationId = newLocationId;
+            }
+
+            Save();
+            return true;
+        }
+
         public bool ItemNameExists(string name, Guid? ignoreId = null)
         {
             return items.Any(item =>
                 item.Name == name &&
                 (ignoreId == null || item.Id != ignoreId));
+        }
+
+        public bool DeleteItemsByIds(List<Guid> itemIds)
+        {
+            items.RemoveAll(item => itemIds.Contains(item.Id));
+            Save();
+            return true;
         }
 
 
