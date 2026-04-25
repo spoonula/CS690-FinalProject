@@ -117,7 +117,7 @@ class ItemsMenu
         switch (selection)
         {
             case "Create New Location":
-                    LocationsMenu locationsMenu = new LocationsMenu(locationsManager);
+                    LocationsMenu locationsMenu = new LocationsMenu(locationsManager, itemManager);
                     l = locationsMenu.CreateLocationMenu();
                 break;
             case "Back":

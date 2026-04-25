@@ -53,7 +53,7 @@ class App
                     itemsMenu.Show();
                     break;
                 case "Locations":
-                    var locationsMenu = new LocationsMenu(locationsManager);
+                    var locationsMenu = new LocationsMenu(locationsManager, itemManager);
                     locationsMenu.Show();     
                     break;   
                 case "Borrowers":
